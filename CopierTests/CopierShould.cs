@@ -2,6 +2,7 @@
 using CopierProject.Interfaces;
 using Moq;
 using NUnit.Framework;
+
 // ReSharper disable InconsistentNaming
 
 namespace CopierTests
@@ -31,12 +32,59 @@ namespace CopierTests
         public void CopiesCharacterFromSourceToDestination()
         {
             // This is creating a stub as it returns something
-            _source.Setup(m => m.GetChar()).Returns('a'); 
+            _source.SetupSequence(m => m.GetChar())
+                .Returns('a')
+                .Returns('\n');
 
             _copier.Copy();
 
             // This is a mock as it is verifying a side effect
             _destination.Verify(m => m.SetChar('a'));
+        }
+
+        [Test]
+        public void CopiesTwoCharactersFromSourceToDestination()
+        {
+            _source.SetupSequence(m => m.GetChar())
+                .Returns('a')
+                .Returns('b')
+                .Returns('\n');
+
+            _copier.Copy();
+
+            _destination.Verify(m => m.SetChar('a'));
+            _destination.Verify(m => m.SetChar('b'));
+        }
+
+        [Test]
+        public void CopiesThreeCharactersFromSourceToDestination()
+        {
+            _source.SetupSequence(m => m.GetChar())
+                .Returns('a')
+                .Returns('b')
+                .Returns('c')
+                .Returns('\n');
+
+            _copier.Copy();
+
+            _destination.Verify(m => m.SetChar('a'));
+            _destination.Verify(m => m.SetChar('b'));
+            _destination.Verify(m => m.SetChar('c'));
+        }
+
+        [Test]
+        public void CopiesThreeCharactersFromSourceToDestinationButTerminatesAtNewlineCharacter()
+        {
+            _source.SetupSequence(m => m.GetChar())
+                .Returns('a')
+                .Returns('b')
+                .Returns('\n');
+
+            _copier.Copy();
+
+            _destination.Verify(m => m.SetChar('a'));
+            _destination.Verify(m => m.SetChar('b'));
+            _destination.Verify(m => m.SetChar('\n'), Times.Never);
         }
     }
 }
